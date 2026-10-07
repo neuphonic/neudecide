@@ -183,6 +183,8 @@ class NeuDecide:
 
         audio: a path to a WAV file, or a numpy array (samples,) or
             (samples, channels) -- pass sample_rate= if it isn't 16 kHz.
+            Integer arrays (e.g. int16) are scaled to [-1, 1]; float arrays
+            should be in [-1, 1] already.
         tools: a list of tool definitions (name, description, JSON-Schema
             parameters), or the same as a JSON string.
         constrained: restrict output to valid calls of the given tools (default True).

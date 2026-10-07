@@ -88,7 +88,7 @@ A command-line version is in `examples/basic_example.py`. From a clone, `python 
 
 ### Audio input
 
-`audio` can be a path to a PCM WAV file or a NumPy array. Arrays may be mono `(samples,)` or multi-channel `(samples, channels)`; channels are averaged to mono. Audio is resampled to 16 kHz automatically, so pass `sample_rate=` if your array is at a different rate:
+`audio` can be a path to a PCM WAV file or a NumPy array. Arrays may be mono `(samples,)` or multi-channel `(samples, channels)`; channels are averaged to mono. Integer arrays, such as the int16 samples `scipy.io.wavfile.read` returns, are scaled to [-1, 1] automatically; float arrays should already be in [-1, 1]. Audio is resampled to 16 kHz automatically, so pass `sample_rate=` if your array is at a different rate:
 
 ```python
 calls = model.generate("command.wav", TOOLS)                     # WAV file
