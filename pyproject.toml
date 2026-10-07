@@ -8,7 +8,7 @@ version = "0.1.0"
 authors = [
   { name="neuphonic", email="general@neuphonic.com" },
 ]
-description = "NeuDecide - a tiny on-device model that turns speech into tool calls."
+description = "NeuDecide - a tiny voice-action model."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10, <3.14"
