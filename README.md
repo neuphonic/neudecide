@@ -2,7 +2,7 @@
 
 **A tiny voice-action model. Audio and a list of tools in, a tool call out. No transcript in between.**
 
-[Hugging Face](https://huggingface.co/neuphonic/neudecide) · [PyPI](https://pypi.org/project/neudecide/) · [arxiv (coming soon]()
+[Hugging Face](https://huggingface.co/neuphonic/neudecide) · [PyPI](https://pypi.org/project/neudecide/) · [arxiv (coming soon}]()
 
 NeuDecide converts speech directly into function calls. It's 43 MB, runs on a single CPU thread via ONNX Runtime, and needs no GPU or internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
 
