@@ -4,7 +4,7 @@
 
 [Hugging Face](https://huggingface.co/neuphonic/neudecide) · [PyPI](https://pypi.org/project/neudecide/) · [arxiv (coming soon}]()
 
-NeuDecide converts speech directly into function calls. It's 43 MB, runs on a single CPU thread via ONNX Runtime, and needs no GPU or internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
+NeuDecide converts speech directly into function calls. It's 43 MB, can run on a single thread via ONNX Runtime, and needs no GPU or internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
 
 ```
 "clean the kitchen"  +  [cleanRoom, goToBase, getBattery]   →   [{"name": "cleanRoom", "arguments": {"room": "kitchen"}}]
@@ -150,7 +150,7 @@ On SLURP, the most varied of the three datasets, NeuDecide beats every other sys
 
 ## Performance
 
-Measured with the `q4` export on a single CPU thread:
+Measured with the `q4` export:
 
 | Device | Time to call | Load time |
 |---|---|---|
