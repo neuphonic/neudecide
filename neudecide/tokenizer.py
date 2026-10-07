@@ -1,7 +1,8 @@
-"""SentencePiece tokenizer, built from the tokenizer.json shipped with the model.
+"""SentencePiece tokenizer, from the model's tokenizer.model or tokenizer.json.
 
-tokenizer.json holds a SentencePiece BPE model as JSON: its pieces (text, score,
-type) plus the normalizer flags encoding depends on. It's turned back into a
+tokenizer.model is SentencePiece's own file (a serialized ModelProto).
+tokenizer.json holds the same BPE model as JSON: its pieces (text, score, type)
+plus the normalizer flags encoding depends on; it's turned back into a
 ModelProto here so the sentencepiece library does the encoding and decoding.
 """
 
@@ -30,18 +31,25 @@ def model_proto(spec):
 
 
 class Tokenizer:
-    def __init__(self, spec):
-        proto = model_proto(spec)
-        self.sp = spm.SentencePieceProcessor(model_proto=proto.SerializeToString())
+    def __init__(self, model):
+        """model: a ModelProto, or tokenizer.json's contents."""
+        proto = model if isinstance(model, sp_pb2.ModelProto) else model_proto(model)
+        serialized = proto.SerializeToString()
+        self.sp = spm.SentencePieceProcessor(model_proto=serialized)
         # The same model without the dummy prefix or whitespace cleanup, for
         # tokenizing text fragments byte-for-byte (constrained decoding needs that).
-        proto.normalizer_spec.add_dummy_prefix = False
-        proto.normalizer_spec.remove_extra_whitespaces = False
-        self.sp_fragment = spm.SentencePieceProcessor(model_proto=proto.SerializeToString())
+        fragment = sp_pb2.ModelProto.FromString(serialized)
+        fragment.normalizer_spec.add_dummy_prefix = False
+        fragment.normalizer_spec.remove_extra_whitespaces = False
+        self.sp_fragment = spm.SentencePieceProcessor(model_proto=fragment.SerializeToString())
 
     @classmethod
     def from_file(cls, path):
-        return cls(json.loads(Path(path).read_text(encoding="utf-8")))
+        """A tokenizer.model, or a tokenizer.json."""
+        path = Path(path)
+        if path.suffix == ".json":
+            return cls(json.loads(path.read_text(encoding="utf-8")))
+        return cls(sp_pb2.ModelProto.FromString(path.read_bytes()))
 
     def __len__(self):
         return self.sp.vocab_size()

@@ -103,6 +103,14 @@ def test_tokenizer_matches_sentencepiece(sp_model, tokenizer, text):
     assert tokenizer.decode(ids) == reference.decode(ids)
 
 
+def test_tokenizer_loads_tokenizer_model(sp_model, tokenizer, tmp_path):
+    (tmp_path / "tokenizer.model").write_bytes(sp_model)
+    native = Tokenizer.from_file(tmp_path / "tokenizer.model")
+    text = json.dumps(TOOLS)
+    assert native.encode(text) == tokenizer.encode(text)
+    assert native.sp_fragment.encode(" [") == tokenizer.sp_fragment.encode(" [")
+
+
 def accepts(tokenizer, ll_tok, text, tools=TOOLS):
     matcher = tool_call_matcher(ll_tok, tools)
     return matcher.consume_tokens(tokenizer.encode(text)) and matcher.is_accepting()

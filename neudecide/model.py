@@ -12,6 +12,8 @@ from .tokenizer import Tokenizer
 logger = logging.getLogger(__name__)
 
 DEFAULT_REPO = "neuphonic/neudecide"
+DEFAULT_VARIANT = "q4"  # int4 MatMulNBits graphs, the ones the native runtime ships
+TOKENIZER_FILES = ("tokenizer.model", "tokenizer.json")  # first one present wins
 
 
 class NeuDecide:
@@ -27,13 +29,17 @@ class NeuDecide:
         # [{"name": "set_timer", "arguments": {"minutes": 5}}]
     """
 
-    def __init__(self, model_dir, variant="q4f", threads=None, providers=None):
-        """model_dir: a directory with config.json, tokenizer.json and the ONNX graphs.
+    def __init__(self, model_dir, variant=DEFAULT_VARIANT, threads=None, providers=None):
+        """model_dir: a directory with config.json, tokenizer.model (or tokenizer.json)
+        and the ONNX graphs.
         variant: which set of graphs from config.json's "variants".
         threads: onnxruntime intra-op threads (None = onnxruntime's default)."""
         model_dir = Path(model_dir)
         self.config = json.loads((model_dir / "config.json").read_text())
-        self.tokenizer = Tokenizer.from_file(model_dir / "tokenizer.json")
+        tokenizer = next((model_dir / f for f in TOKENIZER_FILES if (model_dir / f).exists()), None)
+        if tokenizer is None:
+            raise FileNotFoundError(f"{model_dir} has no {' or '.join(TOKENIZER_FILES)}")
+        self.tokenizer = Tokenizer.from_file(tokenizer)
         self.special = self.config["special_tokens"]
         self.sample_rate = self.config["sample_rate"]
         self.variant = variant
@@ -60,17 +66,23 @@ class NeuDecide:
 
     @classmethod
     def from_pretrained(
-        cls, repo_id=DEFAULT_REPO, variant="q4f", revision=None, token=None, **kwargs
+        cls, repo_id=DEFAULT_REPO, variant=DEFAULT_VARIANT, revision=None, token=None, **kwargs
     ):
         """Downloads (or reuses the cached) model from the Hugging Face Hub."""
         from huggingface_hub import hf_hub_download
+        from huggingface_hub.utils import EntryNotFoundError
 
         def fetch(name):
             return hf_hub_download(repo_id, name, revision=revision, token=token)
 
         config_path = Path(fetch("config.json"))
         config = json.loads(config_path.read_text())
-        fetch("tokenizer.json")
+        for name in TOKENIZER_FILES:
+            try:
+                fetch(name)
+                break
+            except EntryNotFoundError:
+                continue
         for name in cls.graph_files(config, variant).values():
             fetch(name)
         return cls(config_path.parent, variant=variant, **kwargs)
