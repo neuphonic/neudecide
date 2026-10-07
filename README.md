@@ -2,9 +2,9 @@
 
 **A tiny voice-action model. Audio and a list of tools in, a tool call out. No transcript in between.**
 
-[Hugging Face](https://huggingface.co/neuphonic/neudecide) · [PyPI](https://pypi.org/project/neudecide/)
+[Hugging Face](https://huggingface.co/neuphonic/neudecide) · [PyPI](https://pypi.org/project/neudecide/) · [arxiv (coming soon]()
 
-NeuDecide turns speech directly into function calls. It's 42.6 MB on disk (about 55M parameters), runs on a single CPU thread through ONNX Runtime, and needs no GPU and no internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
+NeuDecide converts speech directly into function calls. It's 43 MB, runs on a single CPU thread via ONNX Runtime, and needs no GPU or internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
 
 ```
 "clean the kitchen"  +  [cleanRoom, goToBase, getBattery]   →   [{"name": "cleanRoom", "arguments": {"room": "kitchen"}}]
@@ -26,14 +26,42 @@ This example turns a recorded voice command into a call for a robot vacuum. Save
 from neudecide import NeuDecide
 
 TOOLS = [
-    {"name": "cleanRoom",
+    {
+        "name": "cleanRoom",
         "description": "Vacuum-cleans one room.",
-        "parameters": { "type": "object",
-            "properties": {"room": { "type": "string", "enum": ["living room", "bathroom", "kitchen", "bedroom"],} },
-            "required": ["room"],},},
-    {"name": "goToBase", "description": "Sends the vacuum back to its charging base.", "parameters": {"type": "object", "properties": {}},},
-    {"name": "getBattery", "description": "Reports the vacuum's battery level.", "parameters": {"type": "object", "properties": {}},},
-    ]
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "room": {
+                    "type": "string",
+                    "enum": [
+                        "living room",
+                        "bathroom",
+                        "kitchen",
+                        "bedroom",
+                    ],
+                },
+            },
+            "required": ["room"],
+        },
+    },
+    {
+        "name": "goToBase",
+        "description": "Sends the vacuum back to its charging base.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "getBattery",
+        "description": "Reports the vacuum's battery level.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+]
 
 
 def main():
@@ -79,17 +107,11 @@ NeuDecide is a pre-trained streaming English speech encoder joined to a compact 
 
 | Graph | Runs | Does | Parameters | Size |
 |---|---|---|---|---|
-| `audio_encoder` | Once per utterance | Waveform → audio frames | 28.7M | 22.5 MB |
+| `audio_encoder` | Once per utterance | Waveform → 12.5 Hz latent frames | 28.7M | 22.5 MB |
 | `tool_encoder` | Once per utterance and tool list | Audio frames + tool tokens → cross-attention keys and values | 11.8M | 10.1 MB |
 | `decoder_step` | Once per output token | Next token, reusing a cached self-attention state | 15.0M | 10.0 MB |
 
-Only the small decoder runs in the loop, so each extra output token is cheap.
-
-**Audio is compressed hard.** The audio encoder emits one frame for roughly every 320 ms of speech, so a full 30 s clip becomes about 94 frames.
-
-**The tool list costs more than the audio.** The tool encoder reads the tool tokens and the audio frames as one sequence. Tools can take up to 1,536 tokens against at most about 94 audio frames, so a long tool list adds more work than a long recording.
-
-**Built small from the start.** The model was trained with quantisation-aware training, so it learned to work at the precision it ships in rather than being compressed afterwards. The `q4` export stores weights as 4-bit integers in groups of 32 and quantises the embeddings as well; convolutions use 8 bits. Matrix multiplies run through ONNX Runtime's `MatMulNBits` kernels with int8 activations.
+**TBC** the `tool_encoder` KV-cache state can be retained between tool calls, if the tools remain the same.
 
 | | |
 |---|---|
