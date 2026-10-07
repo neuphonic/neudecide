@@ -21,7 +21,7 @@ class NeuDecide:
 
     Three ONNX graphs run per request:
       audio_encoder   once per utterance:            waveform -> audio frames
-      needle_encoder  once per (utterance, tools):   -> cross-attention keys / values
+      tool_encoder    once per (utterance, tools):   -> cross-attention keys / values
       decoder_step    once per output token, with a growing self-attention KV cache
 
         model = NeuDecide.from_pretrained()
@@ -49,11 +49,11 @@ class NeuDecide:
         if threads:
             options.intra_op_num_threads = threads
         providers = list(providers or ["CPUExecutionProvider"])
-        self.audio_encoder, self.needle_encoder, self.decoder_step = (
+        self.audio_encoder, self.tool_encoder, self.decoder_step = (
             ort.InferenceSession(
                 str(model_dir / graphs[k]), sess_options=options, providers=providers
             )
-            for k in ("audio_encoder", "needle_encoder", "decoder_step")
+            for k in ("audio_encoder", "tool_encoder", "decoder_step")
         )
         self._ll_tokenizer = None
 
@@ -130,7 +130,7 @@ class NeuDecide:
         policy: any object with `select(logits) -> token id`."""
         waveform = prepare_audio(audio, sample_rate, self.sample_rate)
         audio_embeds, audio_len = self.encode_audio(waveform)
-        cross_key, cross_value, encoder_mask = self.needle_encoder.run(
+        cross_key, cross_value, encoder_mask = self.tool_encoder.run(
             None,
             {
                 "audio_embeds": audio_embeds,
