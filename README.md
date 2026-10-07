@@ -7,7 +7,7 @@
 NeuDecide converts speech directly into function calls. It's 43 MB, can run on a single thread via ONNX Runtime, and needs no GPU or internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
 
 ```
-"clean the kitchen"  +  [cleanRoom, goToBase, getBattery]   →   [{"name": "cleanRoom", "arguments": {"room": "kitchen"}}]
+"clean the bathroom"  +  [cleanRoom, goToBase, getBattery]   →   [{"name": "cleanRoom", "arguments": {"room": "bathroom"}}]
 ```
 
 ## Installation
@@ -20,7 +20,7 @@ Requires Python 3.10 – 3.13. The model weights are downloaded from the Hugging
 
 ## Quickstart
 
-This example turns a recorded voice command into a call for a robot vacuum. Save a WAV recording of yourself saying something like "clean the kitchen" as `command.wav`, then run:
+This example turns a recorded voice command into a call for a robot vacuum. Save a WAV recording of yourself saying something like "clean the bathroom" as `command.wav`, then run:
 
 ```python
 from neudecide import NeuDecide
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 Output:
 
 ```
-[{'name': 'cleanRoom', 'arguments': {'room': 'kitchen'}}]
+[{'name': 'cleanRoom', 'arguments': {'room': 'bathroom'}}]
 ```
 
 `generate` returns a list of `{"name", "arguments"}` dicts, or `[]` when no tool applies.
