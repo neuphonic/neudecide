@@ -127,10 +127,10 @@ Tools are serialised exactly as Python's `json.dumps` writes them by default, ma
 ## Results
 
 <p align="center">
-  <img src="assets/param_bubbles.png" alt="Exact match against tool accuracy on FSC, SNIPS SLU and SLURP for NeuDecide, Voxtral Mini 3B and ASR + decision-model cascades, with bubble area showing model size" width="720">
+  <img src="assets/param_bubbles.png" alt="Exact match against tool accuracy on FSC, SNIPS SLU and SLURP for NeuDecide, Whistle → Needle 3, Parakeet 660M → FunctionGemma and Voxtral Mini 3B, with bubble area showing model size" width="720">
 </p>
 
-Exact match against tool accuracy on FSC, SNIPS SLU and SLURP, choosing from 10 tools. Each bubble is one system, and its area is the model's size on disk; a cascade counts its ASR and decision model together. ([PDF](assets/param_bubbles.pdf))
+Exact match against tool accuracy on FSC, SNIPS SLU and SLURP, choosing from 10 tools. Each bubble is one of the four systems in the table below, and its area is the model's size on disk; a cascade counts its ASR and decision model together. ([PDF](assets/param_bubbles.pdf))
 
 We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model. Each system chooses from 10 tools and must pick the right tool and fill its arguments. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
 
