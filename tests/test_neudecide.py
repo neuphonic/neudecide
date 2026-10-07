@@ -198,6 +198,18 @@ def test_load_audio_roundtrip(tmp_path):
     assert prepare_audio(path, None, 16000).shape == (1600,)
 
 
+def test_prepare_audio_scales_integer_arrays():
+    expected = [0.0, 0.5, -1.0]
+    pcm16 = np.array([0, 16384, -32768], dtype=np.int16)
+    np.testing.assert_allclose(prepare_audio(pcm16, None, 16000), expected)
+    np.testing.assert_allclose(prepare_audio(pcm16.astype(np.int32) << 16, None, 16000), expected)
+    np.testing.assert_allclose(
+        prepare_audio(np.array([128, 192, 0], np.uint8), None, 16000), expected
+    )
+    floats = np.array(expected, dtype=np.float32)
+    np.testing.assert_allclose(prepare_audio(floats, None, 16000), expected)  # unchanged
+
+
 @pytest.mark.slow
 def test_generate_from_hub():
     from neudecide import NeuDecide
