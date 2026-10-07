@@ -82,7 +82,7 @@ Output:
 
 `generate` returns a list of `{"name", "arguments"}` dicts, or `[]` when no tool applies.
 
-This script is also in the repo as `examples/basic_example.py`, so from a clone you can run `python examples/basic_example.py`.
+A command-line version is in `examples/basic_example.py`. From a clone, `python examples/basic_example.py` runs it on `examples/command.wav` with the tools in `examples/tools.json`; pass `--audio` and `--tools` to use your own.
 
 ## Usage
 
@@ -110,8 +110,6 @@ NeuDecide is a pre-trained streaming English speech encoder joined to a compact 
 | `audio_encoder` | Once per utterance | Waveform → 12.5 Hz latent frames | 28.7M | 22.5 MB |
 | `tool_encoder` | Once per utterance and tool list | Audio frames + tool tokens → cross-attention keys and values | 11.8M | 10.1 MB |
 | `decoder_step` | Once per output token | Next token, reusing a cached self-attention state | 15.0M | 10.0 MB |
-
-**TBC** the `tool_encoder` KV-cache state can be retained between tool calls, if the tools remain the same.
 
 | | |
 |---|---|

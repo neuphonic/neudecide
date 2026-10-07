@@ -1,6 +1,9 @@
 import json
+from pathlib import Path
 
 from neudecide import NeuDecide
+
+EXAMPLES = Path(__file__).parent
 
 
 def main(audio, tools_path, constrained=True, repo="neuphonic/neudecide"):
@@ -16,9 +19,14 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="NeuDecide Example")
-    parser.add_argument("--audio", type=str, required=True, help="Path to a WAV file")
     parser.add_argument(
-        "--tools", type=str, required=True, help="JSON file holding a list of tool definitions"
+        "--audio", type=str, default=str(EXAMPLES / "command.wav"), help="Path to a WAV file"
+    )
+    parser.add_argument(
+        "--tools",
+        type=str,
+        default=str(EXAMPLES / "tools.json"),
+        help="JSON file holding a list of tool definitions",
     )
     parser.add_argument(
         "--no-constrain", action="store_true", help="Don't restrict output to valid tool calls"
