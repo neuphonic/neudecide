@@ -14,17 +14,17 @@ from neudecide.tokenizer import Tokenizer
 
 TOOLS = [
     {
-        "name": "cleanRoom",
-        "description": "Vacuum-cleans the specified room.",
+        "name": "getWeather",
+        "description": "Gets the weather forecast for a city.",
         "parameters": {
             "type": "object",
-            "properties": {"room": {"type": "string"}, "power": {"type": "integer"}},
-            "required": ["room"],
+            "properties": {"city": {"type": "string"}, "days": {"type": "integer"}},
+            "required": ["city"],
         },
     },
     {
-        "name": "returnToBase",
-        "description": "Docks the robot.",
+        "name": "getTime",
+        "description": "Tells the current time.",
         "parameters": {"type": "object", "properties": {}},
     },
 ]
@@ -37,9 +37,9 @@ def sp_model():
     <unk> <tool_call> <tools>, then byte pieces; identity normalizer."""
     corpus = [
         json.dumps(TOOLS),
-        json.dumps([{"name": "cleanRoom", "arguments": {"room": "kitchen", "power": 3}}]),
-        "clean the kitchen please",
-        "go back to base",
+        json.dumps([{"name": "getWeather", "arguments": {"city": "Paris", "days": 3}}]),
+        "what is the weather in paris",
+        "what time is it",
     ]
     out = io.BytesIO()
     spm.SentencePieceTrainer.train(
@@ -89,7 +89,7 @@ def ll_tok(tokenizer):
     "text",
     [
         "",
-        "clean the kitchen",
+        "weather in paris",
         "  extra   spaces ",
         "caf\u00e9 \U0001f335",
         "<tools>[1]",
@@ -120,18 +120,18 @@ def accepts(tokenizer, ll_tok, text, tools=TOOLS):
     "text",
     [
         "[]",
-        json.dumps([{"name": "returnToBase", "arguments": {}}]),
-        json.dumps([{"name": "cleanRoom", "arguments": {"room": "kitchen", "power": 3}}]),
-        json.dumps([{"name": "cleanRoom", "arguments": {"power": 3, "room": "kitchen"}}]),
+        json.dumps([{"name": "getTime", "arguments": {}}]),
+        json.dumps([{"name": "getWeather", "arguments": {"city": "Paris", "days": 3}}]),
+        json.dumps([{"name": "getWeather", "arguments": {"days": 3, "city": "Paris"}}]),
         json.dumps(
             [
-                {"name": "cleanRoom", "arguments": {"room": 'a "b"'}},
-                {"name": "returnToBase", "arguments": {}},
+                {"name": "getWeather", "arguments": {"city": 'a "b"'}},
+                {"name": "getTime", "arguments": {}},
             ]
         ),
-        '[{"name":"cleanRoom","arguments":{"room":["x",{"y":null}],"power":-1.5e3}}]',
-        json.dumps([{"name": "cleanRoom", "arguments": {"room": "Zürich 🌵"}}]),  # \u escapes
-        '\n [ {"name" : "returnToBase" ,\n "arguments": { } } ]',
+        '[{"name":"getWeather","arguments":{"city":["x",{"y":null}],"days":-1.5e3}}]',
+        json.dumps([{"name": "getWeather", "arguments": {"city": "São Paulo 🌵"}}]),  # \u escapes
+        '\n [ {"name" : "getTime" ,\n "arguments": { } } ]',
     ],
 )
 def test_grammar_accepts_valid_calls(tokenizer, ll_tok, text):
@@ -141,13 +141,13 @@ def test_grammar_accepts_valid_calls(tokenizer, ll_tok, text):
 @pytest.mark.parametrize(
     "text",
     [
-        '[{"name": "mopRoom", "arguments": {}}]',  # unknown tool
-        '[{"name": "cleanRoom", "arguments": {"floor": 1}}]',  # unknown key
+        '[{"name": "getNews", "arguments": {}}]',  # unknown tool
+        '[{"name": "getWeather", "arguments": {"units": 1}}]',  # unknown key
         # repeated keys can't be ruled out by a JSON grammar, only bounded
-        '[{"name": "cleanRoom", "arguments": {"room": "a", "room": "b", "room": "c"}}]',
-        '[{"name": "returnToBase", "arguments": {"tool_id": 4}}]',  # tool takes no arguments
-        '[{"name": "cleanRoom", "arguments": {"room": kitchen}}]',  # malformed value
-        '[{"name": "cleanRoom", "arguments": {"room": "kitchen"}}',  # incomplete
+        '[{"name": "getWeather", "arguments": {"city": "a", "city": "b", "city": "c"}}]',
+        '[{"name": "getTime", "arguments": {"tool_id": 4}}]',  # tool takes no arguments
+        '[{"name": "getWeather", "arguments": {"city": Paris}}]',  # malformed value
+        '[{"name": "getWeather", "arguments": {"city": "Paris"}}',  # incomplete
     ],
 )
 def test_grammar_rejects_invalid_calls(tokenizer, ll_tok, text):
@@ -210,4 +210,4 @@ def test_generate_from_hub():
     assert model.tokenizer.decode(ids) == json.dumps(TOOLS)
     calls = model.generate(np.zeros(16000, dtype=np.float32), TOOLS)
     assert isinstance(calls, list)
-    assert all(c["name"] in {"cleanRoom", "returnToBase"} for c in calls)
+    assert all(c["name"] in {"getWeather", "getTime"} for c in calls)

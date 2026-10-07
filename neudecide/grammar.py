@@ -44,7 +44,7 @@ def tool_parameters(tools):
 
 
 def tool_call_grammar(tools):
-    """A Lark grammar (llguidance's dialect) for the answer to `tools`."""
+    """A Lark grammar, in llguidance's dialect, for the answer to `tools`."""
     calls = []
     for name, keys in tool_parameters(tools).items():
         # patternProperties, not properties: llguidance emits properties in
