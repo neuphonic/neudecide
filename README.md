@@ -136,7 +136,9 @@ We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 6
 
 | | | NeuDecide | Whistle → Needle 3 | Parakeet 660M → FunctionGemma | Voxtral Mini 3B |
 |---|---|---|---|---|---|
-| **Size** | Parameters / file | 55.5M / 43 MB | 176M / 52 MB | 870M / 3.0 GB | 3B / 18.7 GB |
+| **Size** | Parameters | 55.5M | 176M | 870M | 3B |
+| **Size** | File size | 43 MB | 52 MB | 3.0 GB | 18.7 GB |
+| **Size** | File size vs NeuDecide | 1× | 1.2× | 71× | 435× |
 | SLURP | Tool accuracy | **77.3%** | 28.5% | 25.7% | 54.4% |
 | SLURP | Exact match | **24.7%** | 3.9% | 1.5% | 7.6% |
 | Fluent Speech Commands | Tool accuracy | **97.0%** | 66.4% | 80.4% | 96.4% |
