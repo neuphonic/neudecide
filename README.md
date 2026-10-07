@@ -177,7 +177,7 @@ pytest -m "not slow"   # "slow" tests download the model from the Hub
 ## Acknowledgements
 
 - The tool-calling encoder–decoder and tokenizer are built on [Needle](https://github.com/cactus-compute/needle) by [Cactus Compute](https://cactuscompute.com/).
-- https://huggingface.co/nvidia/stt_en_fastconformer_hybrid_medium_streaming_80msThe frozen ASR model is dervied from [Nvidia FastConformer 32M](https://huggingface.co/nvidia/stt_en_fastconformer_hybrid_medium_streaming_80ms).
+- The frozen ASR model is dervied from [Nvidia FastConformer 32M](https://huggingface.co/nvidia/stt_en_fastconformer_hybrid_medium_streaming_80ms).
 
 ## License
 
