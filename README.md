@@ -66,7 +66,7 @@ TOOLS = [
 
 def main():
     model = NeuDecide.from_pretrained()
-    calls = model.generate("command.wav", TOOLS)
+    calls = model.generate("./examples/command.wav", TOOLS)
     print(calls)
 
 
