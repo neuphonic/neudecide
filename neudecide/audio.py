@@ -1,10 +1,10 @@
-"""Audio input: WAV loading with the standard library and resampling with numpy."""
+"""Audio input: WAV loading with the standard library and resampling with soxr."""
 
-import math
 import wave
 from pathlib import Path
 
 import numpy as np
+import soxr
 
 
 def load_audio(path):
@@ -33,29 +33,12 @@ def load_audio(path):
     return x.reshape(-1, channels).mean(axis=1), sr
 
 
-def resample(x, orig_sr, target_sr, lowpass_filter_width=6, rolloff=0.99):
-    """Band-limited sinc resampling with a Hann window -- the same kernel as
-    torchaudio.functional.resample's defaults, which the model was trained with."""
+def resample(x, orig_sr, target_sr):
+    """Band-limited resampling with soxr (its default "HQ" quality)."""
     x = np.asarray(x, dtype=np.float32)
     if orig_sr == target_sr or x.size == 0:
         return x
-    g = math.gcd(int(orig_sr), int(target_sr))
-    orig, new = int(orig_sr) // g, int(target_sr) // g
-    base = min(orig, new) * rolloff
-    width = math.ceil(lowpass_filter_width * orig / base)
-    idx = np.arange(-width, width + orig, dtype=np.float64)[None, :] / orig
-    t = (np.arange(0, -new, -1, dtype=np.float64)[:, None] / new + idx) * base
-    t = np.clip(t, -lowpass_filter_width, lowpass_filter_width)
-    window = np.cos(t * math.pi / lowpass_filter_width / 2) ** 2
-    t *= math.pi
-    with np.errstate(divide="ignore", invalid="ignore"):
-        kernel = np.where(t == 0, 1.0, np.sin(t) / t)
-    kernel = (kernel * window * (base / orig)).astype(np.float32)  # (new, 2 * width + orig)
-
-    padded = np.pad(x, (width, width + orig))
-    frames = np.lib.stride_tricks.sliding_window_view(padded, kernel.shape[1])[::orig]
-    out = (frames @ kernel.T).reshape(-1)
-    return out[: math.ceil(new * x.shape[0] / orig)].astype(np.float32)
+    return soxr.resample(x, orig_sr, target_sr)
 
 
 def prepare_audio(audio, sample_rate, target_sr):

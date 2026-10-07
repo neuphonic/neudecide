@@ -6,7 +6,7 @@ import numpy as np
 import onnxruntime as ort
 
 from .audio import prepare_audio
-from .grammar import ConstrainedSelector, GreedySelector, ToolCallGrammar
+from .grammar import ConstrainedSelector, GreedySelector, ll_tokenizer, tool_call_matcher
 from .tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class NeuDecide:
             )
             for k in ("audio_encoder", "needle_encoder", "decoder_step")
         )
-        self._token_strings = None
+        self._ll_tokenizer = None
 
     @staticmethod
     def graph_files(config, variant):
@@ -104,12 +104,12 @@ class NeuDecide:
         """The token-selection policy for one generation."""
         if not constrained:
             return GreedySelector()
-        if self._token_strings is None:
-            self._token_strings = self.tokenizer.token_strings()
-        grammar = ToolCallGrammar(json.loads(tools) if isinstance(tools, str) else tools)
-        return ConstrainedSelector(
-            grammar, self._token_strings, self.special["tool_call"], self.special["eos"]
-        )
+        if self._ll_tokenizer is None:
+            self._ll_tokenizer = ll_tokenizer(
+                self.tokenizer, self.special["eos"], self.special.values()
+            )
+        matcher = tool_call_matcher(self._ll_tokenizer, tools)
+        return ConstrainedSelector(matcher, self.special["tool_call"], self.special["eos"])
 
     def generate_ids(
         self, audio, tools, sample_rate=None, constrained=True, max_new_tokens=None, selector=None
