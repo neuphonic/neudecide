@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neudecide"
+version = "0.0.1"
+authors = [
+  { name="neuphonic", email="general@neuphonic.com" },
+]
+description = "NeuDecide - a tiny voice-action model."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10, <3.14"
+dependencies = [
+    "huggingface_hub>=0.20",
+    "llguidance>=1.8",
+    "numpy>=1.24",
+    "onnxruntime>=1.23.2",
+    "protobuf>=3.20",
+    "sentencepiece>=0.2.1",
+    "soxr>=0.5",
+]
+
+[tool.setuptools.packages.find]
+include = ["neudecide*"]
+
+[tool.pytest.ini_options]
+markers = ["slow: downloads the model from the Hugging Face Hub"]
