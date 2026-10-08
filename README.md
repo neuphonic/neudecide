@@ -130,23 +130,23 @@ Tools are serialised exactly as Python's `json.dumps` writes them by default, ma
   <img src="assets/param_bubbles.png" alt="Exact match against tool accuracy on FSC, SNIPS SLU and SLURP for NeuDecide, Whistle → Needle 3, Parakeet 660M → FunctionGemma and Voxtral Mini 3B, with bubble area showing Parameter Size" width="720">
 </p>
 
-Exact match against tool accuracy on FSC, SNIPS SLU and SLURP, choosing from 10 tools. Each bubble is one of the four systems in the table below, and its area is the model's size on disk; a cascade counts its ASR and decision model together. ([PDF](assets/param_bubbles.pdf))
+Exact match against tool accuracy on FSC, SNIPS SLU and SLURP, choosing from 10 tools, over all of each dataset's requests (see below). Each bubble is one of the four systems in the table below, and its area is the model's parameter count; a cascade counts its ASR and decision model together. ([PDF](assets/param_bubbles.pdf))
 
-We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model. Each system chooses from 10 tools and must pick the right tool and fill its arguments. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
+We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model. Each system chooses from 10 tools. Some requests need only the right tool; the rest also need its arguments filled, and exact match counts a call as right only if the tool and every argument match. The results cover both kinds of request together, weighted by how many of each a dataset has, as in the plot. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
 
 | | | NeuDecide | Whistle → Needle 3 | Parakeet 660M → FunctionGemma | Voxtral Mini 3B |
 |---|---|---|---|---|---|
 | **Size** | Parameters | 55.5M | 176M | 870M | 3B |
 | **Size** | File size | 43 MB | 52 MB | 3.0 GB | 18.7 GB |
 | **Size** | File size vs NeuDecide | 1× | 1.2× | 71× | 435× |
-| SLURP | Tool accuracy | **77.3%** | 28.5% | 25.7% | 54.4% |
-| SLURP | Exact match | **24.7%** | 3.9% | 1.5% | 7.6% |
-| Fluent Speech Commands | Tool accuracy | **97.0%** | 66.4% | 80.4% | 96.4% |
-| Fluent Speech Commands | Exact match | 82.8% | 58.8% | 65.4% | **95.9%** |
-| SNIPS SLU | Tool accuracy | 70.1% | 61.7% | 43.5% | **87.9%** |
-| SNIPS SLU | Exact match | 20.9% | 15.4% | 17.5% | **36.8%** |
+| SLURP | Tool accuracy | **75.5%** | 25.6% | 25.2% | 48.7% |
+| SLURP | Exact match | **37.5%** | 7.1% | 1.9% | 6.9% |
+| Fluent Speech Commands | Tool accuracy | 90.4% | 60.4% | 75.8% | **90.7%** |
+| Fluent Speech Commands | Exact match | 82.6% | 52.3% | 60.6% | **89.9%** |
+| SNIPS SLU | Tool accuracy | 67.3% | 55.8% | 44.3% | **87.7%** |
+| SNIPS SLU | Exact match | 24.3% | 15.8% | 15.9% | **43.0%** |
 
-On SLURP, the most varied of the three datasets, NeuDecide beats every other system on every metric. With 10 tools, it gets six times as many commands exactly right as the best cascade and three times as many as Voxtral Mini 3B. On Fluent Speech Commands, it picks the right tool more often than any other system, and it beats every cascade on exact match. Voxtral Mini 3B fills arguments more accurately there, at roughly 50 times NeuDecide's parameter count. SNIPS, with its free-form names, is the weak spot (see [Limitations](#limitations)).
+On SLURP, the most varied of the three datasets, NeuDecide beats every other system on every metric. With 10 tools, it gets more than five times as many commands exactly right as the best cascade or Voxtral Mini 3B. On Fluent Speech Commands, it matches Voxtral Mini 3B on tool accuracy (90.4% against 90.7%) and beats every cascade on both metrics. Voxtral Mini 3B fills arguments more accurately there, at roughly 50 times NeuDecide's parameter count. SNIPS, with its free-form names, is the weak spot (see [Limitations](#limitations)).
 
 ## Performance
 
