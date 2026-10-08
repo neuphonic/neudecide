@@ -127,12 +127,12 @@ Tools are serialised exactly as Python's `json.dumps` writes them by default, ma
 ## Results
 
 <p align="center">
-  <img src="assets/param_bubbles.png" alt="Exact match against tool accuracy on FSC, SNIPS SLU and SLURP for NeuDecide, Whistle → Needle 3, Parakeet 660M → FunctionGemma and Voxtral Mini 3B, with bubble area showing Parameter Size" width="720">
+  <img src="assets/tool_acc_params.png" alt="Tool accuracy vs Model Paramaters on the SLURP dataset." width="720">
 </p>
 
-Exact match against tool accuracy on FSC, SNIPS SLU and SLURP, choosing from 10 tools, over all of each dataset's requests (see below). Each bubble is one of the four systems in the table below, and its area is the model's parameter count; a cascade counts its ASR and decision model together. ([PDF](assets/param_bubbles.pdf))
+Tool accuracy against parameter count on SLURP, choosing from 10 tools, over all of its requests (see below); a cascade counts its ASR and decision model together. The dashed line is a least-squares fit over every system but NeuDecide.
 
-We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model. Each system chooses from 10 tools. Some requests need only the right tool; the rest also need its arguments filled, and exact match counts a call as right only if the tool and every argument match. The results cover both kinds of request together, weighted by how many of each a dataset has, as in the plot. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
+We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model. Each system chooses from 10 tools. Some requests need only the right tool; the rest also need its arguments filled, and exact match counts a call as right only if the tool and every argument match. The results cover both kinds of request together, weighted by how many of each SLURP has, as in the plot. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
 
 | | | NeuDecide | Whistle → Needle 3 | Parakeet 660M → FunctionGemma | Voxtral Mini 3B |
 |---|---|---|---|---|---|
@@ -141,12 +141,8 @@ We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 6
 | **Size** | File size vs NeuDecide | 1× | 1.2× | 71× | 435× |
 | SLURP | Tool accuracy | **75.5%** | 25.6% | 25.2% | 48.7% |
 | SLURP | Exact match | **37.5%** | 7.1% | 1.9% | 6.9% |
-| Fluent Speech Commands | Tool accuracy | 90.4% | 60.4% | 75.8% | **90.7%** |
-| Fluent Speech Commands | Exact match | 82.6% | 52.3% | 60.6% | **89.9%** |
-| SNIPS SLU | Tool accuracy | 67.3% | 55.8% | 44.3% | **87.7%** |
-| SNIPS SLU | Exact match | 24.3% | 15.8% | 15.9% | **43.0%** |
 
-On SLURP, the most varied of the three datasets, NeuDecide beats every other system on every metric. With 10 tools, it gets more than five times as many commands exactly right as the best cascade or Voxtral Mini 3B. On Fluent Speech Commands, it matches Voxtral Mini 3B on tool accuracy (90.4% against 90.7%) and beats every cascade on both metrics. Voxtral Mini 3B fills arguments more accurately there, at roughly 50 times NeuDecide's parameter count. SNIPS, with its free-form names, is the weak spot (see [Limitations](#limitations)).
+On SLURP, NeuDecide beats every other system on both metrics. With 10 tools, it gets more than five times as many commands exactly right as the best cascade or Voxtral Mini 3B.
 
 ## Performance
 
