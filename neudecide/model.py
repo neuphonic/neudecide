@@ -177,19 +177,32 @@ class NeuDecide:
         """The raw answer text: a JSON list of calls."""
         return self.decode(self.generate_ids(audio, tools, **kwargs))
 
-    def generate(self, audio, tools, **kwargs):
+    def generate(self, audio, tools, max_new_tokens=None, **kwargs):
         """Tool calls for an utterance: a list of {"name", "arguments"} dicts,
         [] when no tool applies.
 
         audio: a path to a WAV file, or a numpy array (samples,) or
             (samples, channels) -- pass sample_rate= if it isn't 16 kHz.
+            Integer arrays (e.g. int16) are scaled to [-1, 1]; float arrays
+            should be in [-1, 1] already.
         tools: a list of tool definitions (name, description, JSON-Schema
             parameters), or the same as a JSON string.
         constrained: restrict output to valid calls of the given tools (default True).
         max_new_tokens: output length limit (default: the model's max_answer_len).
+            If the answer reaches it, the calls completed before it are
+            returned (logged).
         """
-        text = self.generate_text(audio, tools, **kwargs)
-        return parse_calls(text)
+        limit = max_new_tokens or self.config["max_answer_len"]
+        ids = self.generate_ids(audio, tools, max_new_tokens=limit, **kwargs)
+        if len(ids) < limit:  # ended with EOS
+            return parse_calls(self.decode(ids))
+        calls = complete_calls(self.decode(ids))
+        logger.warning(
+            "answer reached the %d-token limit; returning the %d call(s) completed before it",
+            limit,
+            len(calls),
+        )
+        return calls
 
 
 def parse_calls(text):
@@ -202,3 +215,23 @@ def parse_calls(text):
         return calls
     logger.warning("model output isn't a list of tool calls: %r", text)
     return []
+
+
+def complete_calls(text):
+    """The calls written out in full at the start of a JSON list that was cut off
+    part-way, e.g. [{...}, {"na -> [{...}]."""
+    decoder, calls = json.JSONDecoder(), []
+    text = text.lstrip()
+    if not text.startswith("["):
+        return calls
+    i = 1
+    while True:
+        while i < len(text) and text[i] in " \t\r\n,":
+            i += 1
+        try:
+            call, i = decoder.raw_decode(text, i)
+        except json.JSONDecodeError:
+            return calls
+        if not (isinstance(call, dict) and "name" in call):
+            return calls
+        calls.append(call)

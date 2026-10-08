@@ -41,13 +41,26 @@ def resample(x, orig_sr, target_sr):
     return soxr.resample(x, orig_sr, target_sr)
 
 
+def to_float(x):
+    """Integer PCM samples -> float32 in [-1, 1], scaled as load_audio scales WAV
+    files (int16 / 32768, uint8 centred on 128). Float arrays are kept as they are."""
+    x = np.asarray(x)
+    if np.issubdtype(x.dtype, np.signedinteger):
+        return x.astype(np.float32) / float(-np.iinfo(x.dtype).min)
+    if np.issubdtype(x.dtype, np.unsignedinteger):
+        mid = (np.iinfo(x.dtype).max + 1) / 2
+        return (x.astype(np.float32) - mid) / mid
+    return x.astype(np.float32, copy=False)
+
+
 def prepare_audio(audio, sample_rate, target_sr):
     """A path or array -> mono float32 at `target_sr`. Arrays are (samples,) or
-    (samples, channels) and default to `target_sr` when `sample_rate` is None."""
+    (samples, channels) and default to `target_sr` when `sample_rate` is None;
+    integer arrays are scaled to [-1, 1], float arrays should be in [-1, 1] already."""
     if isinstance(audio, (str, Path)):
         audio, sample_rate = load_audio(audio)
     else:
-        audio = np.asarray(audio, dtype=np.float32)
+        audio = to_float(audio)
         if audio.ndim == 2:
             audio = audio.mean(axis=1)
         elif audio.ndim != 1:

@@ -7,7 +7,7 @@
 NeuDecide converts speech directly into function calls. It's 43 MB, can run on a single thread via ONNX Runtime, and needs no GPU or internet connection once downloaded. Tools are passed in as JSON schemas at inference time, so you change what the model can do by changing the JSON, not by retraining.
 
 ```
-"clean the kitchen"  +  [cleanRoom, goToBase, getBattery]   →   [{"name": "cleanRoom", "arguments": {"room": "kitchen"}}]
+"clean the bathroom"  +  [cleanRoom, goToBase, getBattery]   →   [{"name": "cleanRoom", "arguments": {"room": "bathroom"}}]
 ```
 
 ## Installation
@@ -20,7 +20,7 @@ Requires Python 3.10 – 3.13. The model weights are downloaded from the Hugging
 
 ## Quickstart
 
-This example turns a recorded voice command into a call for a robot vacuum. Save a WAV recording of yourself saying something like "clean the kitchen" as `command.wav`, then run:
+This example turns a recorded voice command into a call for a robot vacuum. Save a WAV recording of yourself saying something like "clean the bathroom" as `command.wav`, then run:
 
 ```python
 from neudecide import NeuDecide
@@ -77,18 +77,18 @@ if __name__ == "__main__":
 Output:
 
 ```
-[{'name': 'cleanRoom', 'arguments': {'room': 'kitchen'}}]
+[{'name': 'cleanRoom', 'arguments': {'room': 'bathroom'}}]
 ```
 
-`generate` returns a list of `{"name", "arguments"}` dicts, or `[]` when no tool applies.
+`generate` returns a list of `{"name", "arguments"}` dicts, or `[]` when no tool applies. If the answer reaches the 128-token output limit, you get the calls completed before it, with a warning.
 
-This script is also in the repo as `examples/basic_example.py`, so from a clone you can run `python examples/basic_example.py`.
+A command-line version is in `examples/basic_example.py`. From a clone, `python examples/basic_example.py` runs it on `examples/command.wav` with the tools in `examples/tools.json`; pass `--audio` and `--tools` to use your own.
 
 ## Usage
 
 ### Audio input
 
-`audio` can be a path to a PCM WAV file or a NumPy array. Arrays may be mono `(samples,)` or multi-channel `(samples, channels)`; channels are averaged to mono. Audio is resampled to 16 kHz automatically, so pass `sample_rate=` if your array is at a different rate:
+`audio` can be a path to a PCM WAV file or a NumPy array. Arrays may be mono `(samples,)` or multi-channel `(samples, channels)`; channels are averaged to mono. Integer arrays, such as the int16 samples `scipy.io.wavfile.read` returns, are scaled to [-1, 1] automatically; float arrays should already be in [-1, 1]. Audio is resampled to 16 kHz automatically, so pass `sample_rate=` if your array is at a different rate:
 
 ```python
 calls = model.generate("command.wav", TOOLS)                     # WAV file
@@ -110,8 +110,6 @@ NeuDecide is a pre-trained streaming English speech encoder joined to a compact 
 | `audio_encoder` | Once per utterance | Waveform → 12.5 Hz latent frames | 28.7M | 22.5 MB |
 | `tool_encoder` | Once per utterance and tool list | Audio frames + tool tokens → cross-attention keys and values | 11.8M | 10.1 MB |
 | `decoder_step` | Once per output token | Next token, reusing a cached self-attention state | 15.0M | 10.0 MB |
-
-**TBC** the `tool_encoder` KV-cache state can be retained between tool calls, if the tools remain the same.
 
 | | |
 |---|---|
@@ -164,7 +162,8 @@ Peak RAM ranged from 146 MB to 174 MB across these devices; it depends on the ru
 
 - **It can fire on noise.** Given 30 s of low-level noise, it still produced a call. There is no calibrated confidence score yet, so put a gate in front: voice-activity detection, or an explicit "no action" tool.
 - **Keep tool lists short.** We recommend at most 10 tools. Longer lists also cost more compute than longer audio, and lists over 1,536 tokens are truncated with a warning.
-- **English only.** Inputs are capped at 30 s of audio and 128 output tokens.
+- **English only.**
+- **Length limits.** Inputs are capped at 30 s of audio, and outputs are capped at 128 tokens.
 - **Free-form arguments are harder.** On SNIPS, where arguments are often open-ended names such as artists and playlists, transcript-based cascades still fill arguments more accurately. Use `enum` wherever an argument has a fixed set of values.
 
 Test it on your own tools and your users' voices before deploying. NeuDecide works best next to a larger model: let it handle the fast, frequent, bounded decisions, and route anything it can't place to a bigger model or a person.
