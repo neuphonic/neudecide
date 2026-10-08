@@ -10,6 +10,7 @@ from sentencepiece import sentencepiece_model_pb2 as sp_pb2
 
 from neudecide.audio import load_audio, prepare_audio, resample
 from neudecide.grammar import ConstrainedSelector, ll_tokenizer, tool_call_matcher
+from neudecide.model import complete_calls
 from neudecide.tokenizer import Tokenizer
 
 TOOLS = [
@@ -176,6 +177,24 @@ def test_constrained_selector_follows_grammar(tokenizer, ll_tok):
         logits[token] = 5.0
         assert sel.select(logits) == token
     assert sel.select(np.zeros(n)) == EOS  # complete -> EOS
+
+
+@pytest.mark.parametrize(
+    "text, names",
+    [
+        ('[{"name": "a", "arguments": {}}, {"name": "b", "argu', ["a"]),
+        ('[{"name": "a", "argu', []),
+        (
+            ' [ {"name" : "a", "arguments": {"x": [1, 2]}} ,\n {"name": "b", "arguments": {}}, {',
+            ["a", "b"],
+        ),
+        ('[{"name": "a", "arguments": {}}]', ["a"]),  # not cut off at all
+        ("[", []),
+        ("", []),
+    ],
+)
+def test_complete_calls(text, names):
+    assert [c["name"] for c in complete_calls(text)] == names
 
 
 def test_resample_length():

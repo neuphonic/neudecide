@@ -80,7 +80,7 @@ Output:
 [{'name': 'cleanRoom', 'arguments': {'room': 'bathroom'}}]
 ```
 
-`generate` returns a list of `{"name", "arguments"}` dicts, or `[]` when no tool applies.
+`generate` returns a list of `{"name", "arguments"}` dicts, or `[]` when no tool applies. If the answer reaches the 128-token output limit, you get the calls completed before it, with a warning.
 
 A command-line version is in `examples/basic_example.py`. From a clone, `python examples/basic_example.py` runs it on `examples/command.wav` with the tools in `examples/tools.json`; pass `--audio` and `--tools` to use your own.
 
