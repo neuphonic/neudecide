@@ -162,7 +162,8 @@ Peak RAM ranged from 146 MB to 174 MB across these devices; it depends on the ru
 
 - **It can fire on noise.** Given 30 s of low-level noise, it still produced a call. There is no calibrated confidence score yet, so put a gate in front: voice-activity detection, or an explicit "no action" tool.
 - **Keep tool lists short.** We recommend at most 10 tools. Longer lists also cost more compute than longer audio, and lists over 1,536 tokens are truncated with a warning.
-- **English only.** Inputs are capped at 30 s of audio and 128 output tokens.
+- **English only.**
+- **Length limits.** Inputs are capped at 30 s of audio, and outputs are capped at 128 tokens.
 - **Free-form arguments are harder.** On SNIPS, where arguments are often open-ended names such as artists and playlists, transcript-based cascades still fill arguments more accurately. Use `enum` wherever an argument has a fixed set of values.
 
 Test it on your own tools and your users' voices before deploying. NeuDecide works best next to a larger model: let it handle the fast, frequent, bounded decisions, and route anything it can't place to a bigger model or a person.
