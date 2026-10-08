@@ -130,7 +130,7 @@ Tools are serialised exactly as Python's `json.dumps` writes them by default, ma
   <img src="assets/tool_acc_params.png" alt="Tool accuracy vs Model Paramaters on the SLURP dataset." width="720">
 </p>
 
-We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model. Each system chooses from 10 tools. Some requests need only the right tool; the rest also need its arguments filled, and exact match counts a call as right only if the tool and every argument match. The results cover both kinds of request together, weighted by how many of each SLURP has, as in the plot. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
+We compared NeuDecide with five speech-recognition cascades (Parakeet 110M and 660M feeding Needle or FunctionGemma, and Whistle feeding Needle 3) and with Voxtral Mini 3B, an end-to-end speech model, on [SLURP](https://aclanthology.org/2020.emnlp-main.588/) (Bastianelli et al., 2020), a dataset of spoken commands to a home assistant across 18 domains. Each system chooses from 10 tools. Some requests need only the right tool; the rest also need its arguments filled, and exact match counts a call as right only if the tool and every argument match. The results cover both kinds of request together, weighted by how many of each SLURP has, as in the plot. The table shows two of the cascades alongside Voxtral Mini 3B; a cascade's size counts its ASR and decision model together.
 
 | | | NeuDecide | Whistle → Needle 3 | Parakeet 660M → FunctionGemma | Voxtral Mini 3B |
 |---|---|---|---|---|---|
