@@ -1,0 +1,39 @@
+[
+  {
+    "name": "cleanRoom",
+    "description": "Vacuum-cleans one room.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "type": "string",
+          "enum": [
+            "living room",
+            "bathroom",
+            "kitchen",
+            "bedroom"
+          ]
+        }
+      },
+      "required": [
+        "room"
+      ]
+    }
+  },
+  {
+    "name": "goToBase",
+    "description": "Sends the vacuum back to its charging base.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "getBattery",
+    "description": "Reports the vacuum's battery level.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  }
+]
