@@ -91,8 +91,11 @@ class NeuDecide:
 
     def encode_tools(self, tools):
         """[<tools>] + the tokenized tool list, serialized with json.dumps defaults
-        (as in training) and truncated to max_tools_len."""
-        text = tools if isinstance(tools, str) else json.dumps(tools)
+        (as in training) and truncated to max_tools_len. A JSON string is parsed
+        and re-serialized, so its formatting doesn't matter."""
+        if isinstance(tools, str):
+            tools = json.loads(tools)
+        text = json.dumps(tools)
         ids = [self.special["tools"]] + self.tokenizer.encode(text)
         limit = self.config["max_tools_len"]
         if len(ids) > limit:

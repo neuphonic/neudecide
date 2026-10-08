@@ -10,7 +10,7 @@ from sentencepiece import sentencepiece_model_pb2 as sp_pb2
 
 from neudecide.audio import load_audio, prepare_audio, resample
 from neudecide.grammar import ConstrainedSelector, ll_tokenizer, tool_call_matcher
-from neudecide.model import complete_calls
+from neudecide.model import NeuDecide, complete_calls
 from neudecide.tokenizer import Tokenizer
 
 TOOLS = [
@@ -195,6 +195,18 @@ def test_constrained_selector_follows_grammar(tokenizer, ll_tok):
 )
 def test_complete_calls(text, names):
     assert [c["name"] for c in complete_calls(text)] == names
+
+
+def test_encode_tools_reserializes_json_strings(tokenizer):
+    model = NeuDecide.__new__(NeuDecide)  # no ONNX graphs needed to encode tools
+    model.tokenizer, model.special, model.config = tokenizer, {"tools": 5}, {"max_tools_len": 1536}
+    expected = model.encode_tools(TOOLS)
+    for text in (
+        json.dumps(TOOLS),
+        json.dumps(TOOLS, indent=2),
+        json.dumps(TOOLS, separators=(",", ":")),
+    ):
+        np.testing.assert_array_equal(model.encode_tools(text), expected)
 
 
 def test_resample_length():
