@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=77.0"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "neudecide"
@@ -24,6 +24,12 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 include = ["neudecide*"]
+
+[tool.maturin]
+bindings = "pyo3"
+manifest-path = "rust/Cargo.toml"
+module-name = "neudecide._rust"
+python-source = "."
 
 [tool.pytest.ini_options]
 markers = ["slow: downloads the model from the Hugging Face Hub"]

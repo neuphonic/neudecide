@@ -170,6 +170,21 @@ pre-commit install
 pytest -m "not slow"   # "slow" tests download the model from the Hub
 ```
 
+### Reproducing the Rust benchmark
+
+Build the editable package, then pin the benchmark to one CPU and run both
+implementations with the same workload:
+
+```bash
+uv pip install -e .
+uv run python benchmarks/selector.py --mode both --cores 0
+```
+
+Use `--cores 2-3` for a different fixed CPU set. The benchmark validates the
+requested affinity, warms up both modes, and reports median timings across
+identical constrained-decoding batches. To run one implementation only, use
+`--mode rust` or `--mode numpy`.
+
 ## Acknowledgements
 
 - https://github.com/cactus-compute/needle

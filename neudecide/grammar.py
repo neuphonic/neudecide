@@ -22,6 +22,11 @@ import numpy as np
 from llguidance import LLMatcher, LLTokenizer, TokenizerWrapper
 from llguidance.numpy import apply_token_bitmask_inplace
 
+try:
+    from ._rust import masked_argmax as _rust_masked_argmax
+except ImportError:
+    _rust_masked_argmax = None
+
 WS = "▁"  # SentencePiece's whitespace marker
 
 
@@ -145,10 +150,13 @@ class ConstrainedSelector:
             return self.tool_call_id
         if self.matcher.is_accepting():
             return self.eos_id
-        logits = np.array(logits, dtype=np.float32).reshape(1, -1)
         mask = np.frombuffer(self.matcher.compute_bitmask(), dtype=np.int32)
-        apply_token_bitmask_inplace(logits, mask)
-        token = int(np.argmax(logits))
+        if _rust_masked_argmax is not None:
+            token = _rust_masked_argmax(np.asarray(logits, dtype=np.float32), mask)
+        else:
+            logits = np.array(logits, dtype=np.float32).reshape(1, -1)
+            apply_token_bitmask_inplace(logits, mask)
+            token = int(np.argmax(logits))
         if not self.matcher.consume_token(token):
             return self.eos_id  # nothing fits; shouldn't happen
         return token

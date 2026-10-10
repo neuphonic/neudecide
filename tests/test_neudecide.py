@@ -179,6 +179,20 @@ def test_constrained_selector_follows_grammar(tokenizer, ll_tok):
     assert sel.select(np.zeros(n)) == EOS  # complete -> EOS
 
 
+def test_rust_masked_argmax_matches_numpy_edge_cases():
+    from llguidance.numpy import apply_token_bitmask_inplace
+    from neudecide._rust import masked_argmax
+
+    cases = [
+        (np.full(64, -np.inf, dtype=np.float32), np.array([0, 1 << 5], dtype=np.int32)),
+        (np.array([1.0, np.nan] + [0.0] * 30, dtype=np.float32), np.array([3], dtype=np.int32)),
+    ]
+    for logits, mask in cases:
+        expected = logits.reshape(1, -1).copy()
+        apply_token_bitmask_inplace(expected, mask)
+        assert masked_argmax(logits, mask) == int(np.argmax(expected))
+
+
 @pytest.mark.parametrize(
     "text, names",
     [
